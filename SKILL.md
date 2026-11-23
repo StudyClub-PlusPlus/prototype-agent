@@ -9,6 +9,44 @@ description: Prototype Agent — 웹사이트·웹서비스 구축 프로젝트�
 > **한 기능 = 문서 하나** — 기능정의서·시나리오를 별도 문서로 쪼개지 않는다.
 > (내부 스킬 식별자: `prototype-agent` — 설치 경로 `~/.claude/skills/prototype-agent/`)
 
+## 0.01 설치와 갱신 (기획자용)
+
+스킬 본체는 **`StudyClub-PlusPlus/prototype-agent`** 레포에 있다. 각자 로컬에서 고쳐 쓰면
+"누구 스킬이 맞냐"가 생기므로, 쓰는 사람은 **클론 + 심링크 + `git pull`** 로 받는다.
+
+```bash
+# 처음 한 번
+git clone git@github.com:StudyClub-PlusPlus/prototype-agent.git ~/Developer/prototype-agent
+ln -s ~/Developer/prototype-agent ~/.claude/skills/prototype-agent
+
+# 갱신 받을 때 (스킬이 바뀌었다는 말이 돌면)
+git -C ~/Developer/prototype-agent pull
+```
+
+심링크로 걸어 두면 `pull` 한 내용이 바로 적용된다. 복사해 넣으면 갱신을 못 받는다.
+적용은 **Claude Code 를 새로 열어야** 된다.
+
+### 기획 산출물·정책은 다른 레포다
+
+스킬은 규칙만 들고 있고, **정책 본문과 프로토 코드는 제품 레포**에 있다. 둘 다 받아야 한다.
+
+| 무엇 | 레포 | 어디 |
+|---|---|---|
+| 스킬(이 문서·references) | `StudyClub-PlusPlus/prototype-agent` | `~/.claude/skills/prototype-agent/` |
+| 정책 · PRD · 프로토 코드 | `StudyClub-PlusPlus/studyclub-engineering` | `01-planning/` · `frontend/apps/playground/` |
+
+```bash
+git -C <studyclub-engineering> fetch && git -C <studyclub-engineering> pull --rebase origin beta
+```
+
+- **기본 브랜치는 `beta`** 다. PRD 의 캡처는 `raw.githubusercontent.com/.../beta/...` 절대 주소라
+  beta 에 올라가야 보인다
+- 정책은 `01-planning/_registry/policies.md` 가 목차다. 화면으로 보려면 플레이그라운드의
+  **정책 라이브러리**
+- 프로토를 직접 만들 거면 `references/prototype-build.md`
+
+---
+
 ## 0. 시스템 지침 (최상위·항상 선행)
 
 본 스킬의 모든 작업·응답·산출물은 **`references/system-instructions.md`** 를 가장 먼저 적용한다. 한국어 출력, 작업 분해·내부 체크리스트 검증, 증거 기반 정량, 결론 선행 top-down, 명사형 종결, 복합 지시 시 실행 단계까지 완수. 본 지침과 충돌하는 가이드 서술은 무효.
@@ -89,6 +127,7 @@ description: Prototype Agent — 웹사이트·웹서비스 구축 프로젝트�
 | 소스 업로드(회의록·프로토타입·**구동 중인 제품(PUD)**·기능목록·기타양식) | Ingest / Reconcile | `references/ingest-reconcile.md` |
 | 프로토타입(Hard Gate 충족) + "PRD 작성/Update" | PRD Create/Update | `references/prd-guide.md` |
 | 기존 prototype 의 새 버전 추가 | Prototype Update Cascade | `ingest-reconcile.md §5.0` |
+| playground 에 화면을 만들어 달라 | Prototype Build | `references/prototype-build.md` |
 | 기본 요건 점검 | Baseline | `references/baseline-requirements.md` |
 | "기획서 작성" (포괄 요청) | Ingest → PRD → FS → US 전체 체인 | 전 가이드 |
 
@@ -156,7 +195,15 @@ description: Prototype Agent — 웹사이트·웹서비스 구축 프로젝트�
 17. **Story 정규문장 정합성 검증 루프**: 라운드 종결 직전 `stories.md` 전수 스캔. (a) 정규식 `^.+[은는] .+할 수 있다\.$` (b) **Actor 표준명 정확 일치** — 별칭 자동 정정 (c) ID 접두사 X (d) 축약·요약 X (e) 사용자 가치 표현. 위반 1건이라도 있으면 라운드 종결 차단 → 자동 정정 후 재검증
 18. **Story PRD 존재 게이트**: 라운드 종결 시 상태가 `기획대기` 이상인 Story 는 `stories/{slug}/PRD.md` 가 실재해야 함. placeholder 잔존 시 PRD 작성 모드 자동 진입
 19. **git 원격 동기화 선행**: 첫 파일 쓰기 직전 `git fetch`+`git pull --rebase`, push 직전 재차 pull 후 push. stale 로컬 기준 작업·맹목 push 금지 (§0.6)
-20. **Session Memory 라운드별 기록**: 모든 라운드 종결 직전 `01-planning/_memory/SESSION-YYYY-MM-DD-NNN.md`에 의도·판단·계획·실행·잔여 5섹션 기록
+20. **화면 문구는 정책이 정한다. 스킬이 정하지 않는다**: 산출물에 **화면에 보이는 말**(버튼·라벨·
+    안내·오류·빈 상태·토스트·창 제목)이 한 줄이라도 들어가면 **POL-0008 「화면 공통 규칙」**과
+    **POL-0011 「UX 라이팅」**을 열고 **거기 적힌 대로** 쓴다.
+    - **말끝·용어·문구 모양을 스킬이 다시 정하지 않는다** — 워딩은 POL-0011 소관이다
+    - 둘이 부딪히면 **POL-0008(구조)이 이긴다**
+    - **정책에 없는 것은 임의로 정하지 않는다.** 기획자에게 한 줄로 묻고, 정해진 답을 **정책에 적고
+      나서** 쓴다 — 문서에만 남기면 다음 사람이 같은 자리에서 다르게 정한다
+    - 문서 본문(PRD·커밋) 쓰는 법과 묻는 법은 `references/writing-tone.md`
+21. **Session Memory 라운드별 기록**: 모든 라운드 종결 직전 `01-planning/_memory/SESSION-YYYY-MM-DD-NNN.md`에 의도·판단·계획·실행·잔여 5섹션 기록
 
 ## 6. 작업 종료 시
 
@@ -188,6 +235,8 @@ description: Prototype Agent — 웹사이트·웹서비스 구축 프로젝트�
 | `references/_SHARED_CONVENTIONS.md` | 모든 작업 시작 전 (필수) |
 | `references/ingest-reconcile.md` | 소스 투입·Story 정리 |
 | `references/prd-guide.md` | PRD 작성/Update |
+| `references/prototype-build.md` | **playground 에 프로토 화면을 만들 때** — spec.ts 원본·번호 주석·PRD 내보내기·캡처 |
+| `references/writing-tone.md` | 기획 문서 본문 쓰는 법·묻는 법. **화면 문구는 POL-0008·POL-0011 소관** |
 | `references/baseline-requirements.md` | 웹 기본 요건 점검(PRD 단계) |
 | `references/review-loop.md` | 산출물 확정 전 독립 전문가 검증 루프 |
 | `references/change-plan.md` | 변경 착수 전 변경 계획·사용자 승인 게이트 |

@@ -36,6 +36,30 @@ ln -s ~/Developer/prototype-agent ~/.claude/skills/prototype-agent
 
 명시적으로 부르려면 `/prototype-agent` 를 쓰면 됩니다.
 
+## 갱신 받기
+
+```bash
+git -C ~/Developer/prototype-agent pull
+```
+
+심링크로 걸어 뒀으면 바로 적용됩니다(Claude Code 는 새로 열어야 합니다).
+복사해 넣었으면 갱신을 못 받으니 심링크로 바꿔 주세요.
+
+## 제품 레포도 같이 받아야 합니다
+
+스킬은 **규칙만** 들고 있습니다. 화면 문구를 정하는 정책과 프로토 코드는 제품 레포에 있습니다.
+
+| 무엇 | 레포 | 어디 |
+|---|---|---|
+| 스킬 | `StudyClub-PlusPlus/prototype-agent` | `~/.claude/skills/prototype-agent/` |
+| 정책 · PRD · 프로토 | `StudyClub-PlusPlus/studyclub-engineering` | `01-planning/` · `frontend/apps/playground/` |
+
+```bash
+git -C <studyclub-engineering> pull --rebase origin beta
+```
+
+기본 브랜치는 **`beta`** 입니다. PRD 의 화면 캡처가 절대 주소라 beta 기준으로 봐야 보입니다.
+
 ## 구조
 
 ```
@@ -43,6 +67,8 @@ SKILL.md                    진입점 — 원칙과 작업 흐름
 references/                 세부 지침
   _SHARED_CONVENTIONS.md      ID 체계·파일 배치 등 공통 규약
   prd-guide.md                PRD 작성법 (번호별 명세 규칙 포함)
+  prototype-build.md          playground 에 프로토 화면을 만드는 법
+  writing-tone.md             기획 문서 쓰는 법·묻는 법 (화면 문구는 정책 소관)
   ingest-reconcile.md         입력 자료 판정과 기존 백로그와의 대조
   change-plan.md              변경 계획 승인 흐름
   review-loop.md              검토 루프
